@@ -6,8 +6,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 
@@ -20,8 +18,9 @@ public final class ApkFileProvider extends ContentProvider {
     private static final String PATH_UPDATES = "updates";
 
     static File updateDirectory(Context context) {
-        File base = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        if (base == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        // 对齐原作者：使用内部存储，防止旧电视无外部存储或权限受限
+        File base = context.getFilesDir();
+        if (base == null) {
             base = context.getCacheDir();
         }
         return base == null ? null : new File(base, PATH_UPDATES);
@@ -124,6 +123,7 @@ public final class ApkFileProvider extends ContentProvider {
         return file;
     }
 
+    // 【关键保留】必须以你的为主，保证老用户的升级路径不断
     private static boolean isAllowedName(String name) {
         return name != null && name.matches("(?:XCZ(?:64|X86)?|received)-[0-9]+\\.apk");
     }
